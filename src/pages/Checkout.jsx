@@ -24,4 +24,4 @@ export default function CheckoutPage() {
       <Checkout selection={selection} />
     </div>
   );
-}
+} 
