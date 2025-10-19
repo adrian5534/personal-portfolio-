@@ -5,7 +5,7 @@ import {
   CardNumberElement,
   CardExpiryElement,
   CardCvcElement,
-  PaymentRequestButtonElement,
+  ExpressCheckoutElement,
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
@@ -26,14 +26,12 @@ const elementStyle = {
   },
 };
 
-// Map monthly add-ons to cents
 const MONTHLY_ADDONS = {
-  'Basic maintenance': 10000,      // $100/mo
-  'Monthly optimization': 20000,   // $200/mo
-  'Maintenance plan': 30000,       // $300/mo
+  'Basic maintenance': 10000,
+  'Monthly optimization': 20000,
+  'Maintenance plan': 30000,
 };
 
-// Prefer explicit selection.monthly (USD), else sum from add-on names
 function getMonthlyCents(selection) {
   const explicit = Number(selection?.monthly || 0);
   if (explicit > 0) return Math.round(explicit * 100);
@@ -41,7 +39,6 @@ function getMonthlyCents(selection) {
   return names.reduce((sum, name) => sum + (MONTHLY_ADDONS[name] || 0), 0);
 }
 
-// Simple debounce hook
 function useDebouncedValue(value, delay = 400) {
   const [v, setV] = useState(value);
   useEffect(() => {
@@ -53,102 +50,83 @@ function useDebouncedValue(value, delay = 400) {
 
 function PaymentForm({ selection, billing, setBilling, amountCents }) {
   const stripe = useStripe();
+  const elements = useElements();
   const navigate = useNavigate();
-  const [pr, setPr] = useState(null);
-  const [canPay, setCanPay] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
 
-  useEffect(() => {
-    if (!stripe) return;
-    const paymentRequest = stripe.paymentRequest({
-      country: billing.country || 'US',
-      currency: 'usd',
-      total: { label: 'Total', amount: Math.max(amountCents || 0, 0) },
-      requestPayerName: true,
-      requestPayerEmail: true,
+  // Create PaymentIntent for Express Checkout
+  async function ensureClientSecret() {
+    if (clientSecret && amountCents > 0) return clientSecret;
+    const monthlyCents = getMonthlyCents(selection);
+    const res = await fetch('/.netlify/functions/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: Math.max(amountCents || 0, 0),
+        currency: 'usd',
+        receipt_email: billing.email || undefined,
+        monthlyCents,
+        summary: selection?.plan ? `${selection.plan} — ${amountCents / 100} USD` : undefined,
+        billing,
+        metadata: { source: 'express-checkout', plan: selection?.plan || '' },
+      }),
     });
-    paymentRequest.canMakePayment().then((res) => setCanPay(!!res));
-    setPr(paymentRequest);
-  }, [stripe, amountCents, billing.country]);
+    const payload = await res.json();
+    if (!res.ok || !payload?.clientSecret) {
+      throw new Error(payload?.error || 'Failed to create payment');
+    }
+    setClientSecret(payload.clientSecret);
+    return payload.clientSecret;
+  }
 
-  useEffect(() => {
-    if (!pr || !stripe) return;
-    const handler = async (ev) => {
-      try {
-        const monthlyCents = getMonthlyCents(selection);
-
-        const res = await fetch('/.netlify/functions/create-payment-intent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: Math.max(amountCents || 0, 0),
-            currency: 'usd',
-            receipt_email: ev.payerEmail,
-            monthlyCents,
-            metadata: { source: 'payment-request', plan: selection?.plan || '' },
-          }),
-        });
-
-        const ct = res.headers.get('content-type') || '';
-        const payload = ct.includes('application/json') ? await res.json() : await res.text();
-        if (!res.ok) throw new Error((payload && payload.error) || payload || 'Failed to create payment');
-
-        const { error, paymentIntent } = await stripe.confirmCardPayment(payload.clientSecret, {
-          payment_method: ev.paymentMethod.id,
-        });
-
-        if (error) {
-          ev.complete('fail');
-          toast.error(error.message || 'Payment failed');
-          return;
-        }
-
-        ev.complete('success');
+  // Express Checkout confirm handler
+  const onConfirm = async () => {
+    try {
+      if (!stripe || !elements) return;
+      const secret = await ensureClientSecret();
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        clientSecret: secret,
+        redirect: 'if_required',
+      });
+      if (error) {
+        toast.error(error.message || 'Payment failed');
+        return;
+      }
+      if (paymentIntent?.status === 'succeeded') {
         toast.success('Payment successful!');
-
-        // Create subscription for wallet flow too
-        if (monthlyCents > 0 && payload.customerId && paymentIntent?.status === 'succeeded') {
+        const monthlyCents = getMonthlyCents(selection);
+        if (monthlyCents > 0) {
           try {
-            const r = await fetch('/.netlify/functions/create-subscription', {
+            await fetch('/.netlify/functions/create-subscription', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                customerId: payload.customerId,
                 paymentIntentId: paymentIntent.id,
                 monthlyCents,
                 currency: 'usd',
                 plan: selection?.plan || 'Monthly Service',
               }),
             });
-            const j = await r.json();
-            if (!r.ok) throw new Error(j.error || 'Subscription error');
-            toast.success('Subscription created');
-          } catch (e) {
-            toast.error(e.message || 'Subscription creation failed');
+          } catch {
+            // ignore errors
           }
         }
-
-        // Redirect to confirmation
-        if (paymentIntent?.id) {
-          navigate(`/payment-confirmation?pi=${encodeURIComponent(paymentIntent.id)}`);
-        }
-      } catch (e) {
-        ev.complete('fail');
-        toast.error(e.message || 'Wallet payment failed');
+        navigate(`/payment-confirmation?pi=${encodeURIComponent(paymentIntent.id)}`);
+      } else {
+        toast.info('Payment status: ' + (paymentIntent?.status || 'unknown'));
       }
-    };
-
-    pr.on('paymentmethod', handler);
-    return () => {
-      // Some environments don't expose .off(); no-op cleanup is fine.
-    };
-  }, [pr, stripe, amountCents, selection, navigate]);
+    } catch (e) {
+      toast.error(e.message || 'Express Checkout failed');
+    }
+  };
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
     setBilling((prev) => {
       let v = type === 'checkbox' ? checked : value;
       if (name === 'state' && (prev.country || 'US') === 'US') {
-        v = String(v).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2); // e.g., NYC -> NY
+        v = String(v).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
       }
       return { ...prev, [name]: v };
     });
@@ -161,7 +139,6 @@ function PaymentForm({ selection, billing, setBilling, amountCents }) {
           <h5 className="mb-0">Billing details</h5>
           <span className="text-muted small">All fields required</span>
         </div>
-
         <Form className="billing-grid">
           <Row className="g-3">
             <Col md={6}>
@@ -172,7 +149,6 @@ function PaymentForm({ selection, billing, setBilling, amountCents }) {
               <Form.Label>Email</Form.Label>
               <Form.Control type="email" name="email" value={billing.email} onChange={onChange} placeholder="john.doe@example.com" required />
             </Col>
-
             <Col md={6}>
               <Form.Label>Phone number</Form.Label>
               <Form.Control name="phone" value={billing.phone} onChange={onChange} placeholder="(555) 123-4567" />
@@ -181,7 +157,6 @@ function PaymentForm({ selection, billing, setBilling, amountCents }) {
               <Form.Label>Address line 1</Form.Label>
               <Form.Control name="address1" value={billing.address1} onChange={onChange} placeholder="123 Main Street" required />
             </Col>
-
             <Col md={6}>
               <Form.Label>Address line 2 (optional)</Form.Label>
               <Form.Control name="address2" value={billing.address2} onChange={onChange} placeholder="Apt, suite, unit" />
@@ -190,7 +165,6 @@ function PaymentForm({ selection, billing, setBilling, amountCents }) {
               <Form.Label>City</Form.Label>
               <Form.Control name="city" value={billing.city} onChange={onChange} placeholder="San Francisco" required />
             </Col>
-
             <Col md={6}>
               <Form.Label>State/Region</Form.Label>
               <Form.Control name="state" value={billing.state} onChange={onChange} placeholder="CA" required />
@@ -199,7 +173,6 @@ function PaymentForm({ selection, billing, setBilling, amountCents }) {
               <Form.Label>Postal code</Form.Label>
               <Form.Control name="postal" value={billing.postal} onChange={onChange} placeholder="94105" required />
             </Col>
-
             <Col md={6}>
               <Form.Label>Country</Form.Label>
               <Form.Select name="country" value={billing.country} onChange={onChange} required>
@@ -220,18 +193,14 @@ function PaymentForm({ selection, billing, setBilling, amountCents }) {
         </Form>
 
         <h5 className="mt-4">Payment method</h5>
-
+        {/* Express Checkout (Apple Pay / Google Pay / Link) */}
         <div className="mb-3">
-          {canPay && pr && (
-            <PaymentRequestButtonElement
-              options={{
-                paymentRequest: pr,
-                style: { paymentRequestButton: { type: 'default', theme: 'dark', height: '40px' } },
-              }}
-            />
-          )}
+          <ExpressCheckoutElement
+            options={{ emailRequired: true }}
+            onConfirm={onConfirm}
+          />
         </div>
-
+        {/* Card fields */}
         <Row className="g-3">
           <Col md={12}>
             <Form.Label>Card number</Form.Label>
@@ -251,7 +220,6 @@ function PaymentForm({ selection, billing, setBilling, amountCents }) {
               <CardCvcElement options={elementStyle} />
             </div>
           </Col>
-
           <Col md={12}>
             <Form.Check
               type="checkbox"
@@ -263,7 +231,6 @@ function PaymentForm({ selection, billing, setBilling, amountCents }) {
             />
           </Col>
         </Row>
-
         <div className="mt-3 small">
           Need help? <Link to="/#contact">Contact support</Link>
         </div>
@@ -626,14 +593,30 @@ export default function Checkout({ selection }) {
   });
   const [computedTotalCents, setComputedTotalCents] = useState(Math.round((selection?.total || 0) * 100));
 
+  // Stripe Elements options for modern wallet support
+  const elementsOptions = useMemo(() => ({
+    mode: 'payment',
+    amount: Math.max(computedTotalCents || 0, 0),
+    currency: 'usd',
+  }), [computedTotalCents]);
+
   return (
-    <Elements stripe={stripePromise}>
+    <Elements stripe={stripePromise} options={elementsOptions}>
       <Row className="checkout-grid g-4">
         <Col lg={7} md={7} sm={12}>
-          <PaymentForm selection={selection} billing={billing} setBilling={setBilling} amountCents={computedTotalCents} />
+          <PaymentForm
+            selection={selection}
+            billing={billing}
+            setBilling={setBilling}
+            amountCents={computedTotalCents}
+          />
         </Col>
         <Col lg={5} md={5} sm={12}>
-          <OrderSummary selection={selection} billing={billing} onTotalChange={setComputedTotalCents} />
+          <OrderSummary
+            selection={selection}
+            billing={billing}
+            onTotalChange={setComputedTotalCents}
+          />
         </Col>
       </Row>
     </Elements>
