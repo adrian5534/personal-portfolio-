@@ -7,6 +7,17 @@ export default function Header({ slides = [], intervalMs = 5000, height = '50vh'
   const total = slides.length;
   const timerRef = useRef(null);
 
+  const sliderRef = useRef(null);
+  const swipeRef = useRef({
+    active: false,
+    startX: 0,
+    startY: 0,
+    dx: 0,
+    dy: 0,
+    locked: null,     // 'x' | 'y' | null
+    pointerId: null,
+  });
+
   const next = React.useCallback(() => setIndex((i) => (i + 1) % total), [total]);
   const prev = () => setIndex((i) => (i - 1 + total) % total);
 
@@ -15,6 +26,65 @@ export default function Header({ slides = [], intervalMs = 5000, height = '50vh'
     timerRef.current = setInterval(next, intervalMs);
     return () => clearInterval(timerRef.current);
   }, [total, reduce, hovering, intervalMs, next]);
+
+  const onPointerDown = (e) => {
+    // Only handle primary pointer
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    swipeRef.current.active = true;
+    swipeRef.current.pointerId = e.pointerId;
+    swipeRef.current.startX = e.clientX;
+    swipeRef.current.startY = e.clientY;
+    swipeRef.current.dx = 0;
+    swipeRef.current.dy = 0;
+    swipeRef.current.locked = null;
+
+    sliderRef.current?.setPointerCapture?.(e.pointerId);
+    setHovering(true); // pause auto-advance
+    clearInterval(timerRef.current);
+  };
+
+  const onPointerMove = (e) => {
+    if (!swipeRef.current.active) return;
+    swipeRef.current.dx = e.clientX - swipeRef.current.startX;
+    swipeRef.current.dy = e.clientY - swipeRef.current.startY;
+
+    const { dx, dy, locked } = swipeRef.current;
+    if (!locked) {
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+        swipeRef.current.locked = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      }
+    }
+    // If horizontal swipe, prevent vertical scroll jitter
+    if (swipeRef.current.locked === 'x') {
+      e.preventDefault();
+    }
+  };
+
+  const endSwipe = () => {
+    if (!swipeRef.current.active) return;
+    const { dx, locked, pointerId } = swipeRef.current;
+    const threshold = 40; // px to trigger
+
+    if (locked === 'x' && Math.abs(dx) > threshold) {
+      if (dx < 0) next();
+      else prev();
+    }
+
+    // Reset
+    swipeRef.current.active = false;
+    swipeRef.current.pointerId = null;
+    swipeRef.current.locked = null;
+    swipeRef.current.dx = 0;
+    swipeRef.current.dy = 0;
+
+    try { sliderRef.current?.releasePointerCapture?.(pointerId); } catch {
+      // Intentionally ignore errors when releasing pointer capture
+    }
+    setHovering(false); // resume auto on next effect tick
+  };
+
+  const onPointerUp = () => endSwipe();
+  const onPointerCancel = () => endSwipe();
 
   if (!total) {
     return (
@@ -33,7 +103,16 @@ export default function Header({ slides = [], intervalMs = 5000, height = '50vh'
 
   return (
     <header className="HeroHeader" style={{ '--hero-h': height }} role="region" aria-label="Featured work slideshow">
-      <div className="slider" onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)}>
+      <div
+        className="slider"
+        ref={sliderRef}
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
+      >
         {slides.map((s, i) => {
           const active = i === index;
           return (

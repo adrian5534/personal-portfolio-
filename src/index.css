@@ -176,6 +176,7 @@ h2 { color: #282c34; }
   height: var(--hero-h);
   overflow: hidden;
   width: 100%;
+  touch-action: pan-y; /* allow horizontal gestures */
 }
 
 .HeroHeader .slide {
