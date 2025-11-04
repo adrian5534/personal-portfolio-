@@ -12,25 +12,18 @@ function Resume() {
             <ListGroup variant="flush">
               <ListGroup.Item>
                 <h5>Freelance Web Developer</h5>
-                <p>Self-employed</p>
-                <p>January 2018 - Present</p>
+                <p>Self-employed - 2019 - Present (6 yrs)</p>
                 <ul>
-                  <li>Transformed complex layout PSDs into pixel-perfect HTML5/CSS3 templates.</li>
-                  <li>Created responsive website designs ensuring cross-browser compatibility.</li>
-                  <li>Built and customized websites using WordPress, including plugin and theme development.</li>
-                  <li>Worked with design tools to create web-optimized images.</li>
-                  <li>Managed multiple projects simultaneously, delivering high-quality work under tight deadlines.</li>
+                  <li>Build responsive React/Bootstrap UIs.</li>
+                  <li>Ship accessible, performant HTML/CSS.</li>
                 </ul>
               </ListGroup.Item>
               <ListGroup.Item>
                 <h5>Frontend Developer</h5>
-                <p>YSB Academy LLC</p>
-                <p>June 2024 - December 2024</p>
+                <p>YSB Academy LLC - Jun 2024 - Present</p>
                 <ul>
-                  <li>Developed and maintained the front end functionality of websites.</li>
-                  <li>Participated in the design and development of web applications.</li>
-                  <li>Collaborated with designers to create clean interfaces and simple, intuitive interactions and experiences.</li>
-                  <li>Optimized websites for maximum speed and scalability.</li>
+                  <li>Features and polish for a production React app.</li>
+                  <li>Improved load times and UX.</li>
                 </ul>
               </ListGroup.Item>
             </ListGroup>
@@ -40,18 +33,13 @@ function Resume() {
             <ListGroup variant="flush">
               <ListGroup.Item>
                 <h5>High School Diploma</h5>
-                <p>Norman Manley High School</p>
-                <p>Graduated 2014</p>
+                <p>Norman Manley High School - 2014</p>
               </ListGroup.Item>
             </ListGroup>
             <h3>Skills</h3>
             <ListGroup variant="flush">
-              <ListGroup.Item>HTML5, CSS3, JavaScript, jQuery, Bootstrap, Media Queries</ListGroup.Item>
-              <ListGroup.Item>JavaScript, Python, Node.js, TypeScript</ListGroup.Item>
-              <ListGroup.Item>React, Vue.js, Angular</ListGroup.Item>
-              <ListGroup.Item>RESTful/GraphQL APIs, Full-stack design and development</ListGroup.Item>
-              <ListGroup.Item>Git, GitHub, Visual Studio Code</ListGroup.Item>
-              <ListGroup.Item>Excellent written and spoken English, attention to detail, highly organized, positive attitude, quick learner</ListGroup.Item>
+              <ListGroup.Item>Frontend: HTML5, CSS3, JavaScript (ES6+), TypeScript, React, Vue, Angular, Bootstrap, jQuery</ListGroup.Item>
+              <ListGroup.Item>Backend & Tools: Node.js, Python, REST/GraphQL APIs, performance, Git/GitHub, VS Code</ListGroup.Item>
             </ListGroup>
           </Col>
         </Row>

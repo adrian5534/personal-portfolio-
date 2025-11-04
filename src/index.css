@@ -1,5 +1,10 @@
+/* Global + anchor offset */
+:root { --nav-h: 56px; }
+@media (min-width: 992px) { :root { --nav-h: 64px; } }
+
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: var(--nav-h); /* offset in-page links for sticky nav */
 }
 
 body {
@@ -7,25 +12,29 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  overflow-x: hidden; /* prevent 100vw full-bleed from causing horizontal scroll */
 }
+
+/* Give sections some anchor offset as well */
+main > section,
+section[id] { scroll-margin-top: var(--nav-h); }
 
 .App-header {
   background-color: #282c34;
-  padding: 60px 20px; /* Increase padding for a more spacious look */
+  padding: 60px 20px;
   color: white;
   text-align: center;
+  margin-top: 0; /* keep flush under sticky nav */
 }
 
 .App-header h1 {
-  font-size: 3em; /* Increase font size for the header text */
+  font-size: 3em;
   margin: 0;
-  padding: 20px 0; /* Add padding to the header text */
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Add a text shadow for better readability */
+  padding: 20px 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-main {
-  padding: 20px;
-}
+main { padding: 20px; }
 
 section {
   margin-bottom: 40px;
@@ -34,17 +43,15 @@ section {
   background-color: #f9f9f9;
 }
 
-h2 {
-  color: #282c34;
-}
+h2 { color: #282c34; }
 
 /* Navbar Component Styles */
 .Navbar {
   background-color: #343a40;
   padding: 10px 20px;
-  margin: 0; /* Remove margin to ensure the navbar spans the full width */
-  border-radius: 0; /* Remove border-radius for a full-width navbar */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
+  margin: 0;
+  border-radius: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .Navbar .navbar-brand {
@@ -59,13 +66,9 @@ h2 {
   transition: color 0.3s ease;
 }
 
-.Navbar .nav-link:hover {
-  color: #ddd !important;
-}
+.Navbar .nav-link:hover { color: #ddd !important; }
 
-.Navbar .navbar-toggler {
-  border-color: rgba(255, 255, 255, 0.1);
-}
+.Navbar .navbar-toggler { border-color: rgba(255, 255, 255, 0.1); }
 
 .Navbar .navbar-toggler-icon {
   background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 255, 255, 0.5%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
@@ -78,53 +81,18 @@ h2 {
   border-radius: 8px;
 }
 
-#bio h2 {
-  margin-bottom: 20px;
-}
-
-#bio p {
-  margin-bottom: 10px;
-}
-
-#bio img {
-  max-width: 100%;
-  border-radius: 50%;
-}
-
-#bio .text-center {
-  text-align: center;
-}
+#bio h2 { margin-bottom: 20px; }
+#bio p { margin-bottom: 10px; }
+#bio img { max-width: 100%; border-radius: 50%; }
+#bio .text-center { text-align: center; }
 
 /* Resume Component Styles */
-#resume h3 {
-  margin-top: 20px;
-}
-
-#resume ul {
-  padding-left: 20px;
-}
-
-#resume ul li {
-  list-style-type: disc;
-}
-
-#resume .list-group-item {
-  background-color: transparent;
-  border: none;
-  padding-left: 0;
-}
-
-#resume h5 {
-  margin-bottom: 5px;
-}
-
-#resume p {
-  margin-bottom: 5px;
-}
-
-#resume ul {
-  margin-bottom: 10px;
-}
+#resume h3 { margin-top: 20px; }
+#resume ul { padding-left: 20px; margin-bottom: 10px; }
+#resume ul li { list-style-type: disc; }
+#resume .list-group-item { background-color: transparent; border: none; padding-left: 0; }
+#resume h5 { margin-bottom: 5px; }
+#resume p { margin-bottom: 5px; }
 
 /* Projects Component Styles */
 #projects .card {
@@ -135,45 +103,14 @@ h2 {
   display: flex;
   flex-direction: column;
 }
-
-#projects .card:hover {
-  transform: translateY(-10px);
-}
-
-#projects .card-title {
-  color: #282c34;
-}
-
-#projects .card-text {
-  margin-bottom: 10px;
-}
-
-#projects .btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
-}
-
-#projects .btn-primary:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
-}
-
-#projects .card-img-top {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16/9; /* Maintain a 16:9 aspect ratio */
-  object-fit: cover; /* Ensure the images cover the entire area while maintaining aspect ratio */
-}
-
-#projects .card-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-#projects .card-body .btn {
-  margin-top: auto;
-}
+#projects .card:hover { transform: translateY(-10px); }
+#projects .card-title { color: #282c34; }
+#projects .card-text { margin-bottom: 10px; }
+#projects .btn-primary { background-color: #007bff; border-color: #007bff; }
+#projects .btn-primary:hover { background-color: #0056b3; border-color: #0056b3; }
+#projects .card-img-top { width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; }
+#projects .card-body { flex: 1; display: flex; flex-direction: column; }
+#projects .card-body .btn { margin-top: auto; }
 
 /* Blog Component Styles */
 #blog .card {
@@ -184,150 +121,292 @@ h2 {
   display: flex;
   flex-direction: column;
 }
+#blog .card:hover { transform: translateY(-10px); }
+#blog .card-title { color: #282c34; }
+#blog .card-text { margin-bottom: 10px; }
+#blog .btn-primary { background-color: #007bff; border-color: #007bff; }
+#blog .btn-primary:hover { background-color: #0056b3; border-color: #0056b3; }
+#blog .card-img-top { width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; }
 
-#blog .card:hover {
-  transform: translateY(-10px);
-}
-
-#blog .card-title {
-  color: #282c34;
-}
-
-#blog .card-text {
-  margin-bottom: 10px;
-}
-
-#blog .btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
-}
-
-#blog .btn-primary:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
-}
-
-#blog .card-img-top {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16/9; /* Maintain a 16:9 aspect ratio */
-  object-fit: cover; /* Ensure the images cover the entire area while maintaining aspect ratio */
-}
-
-/* Contact Component Styles */
+/* Contact Component Styles (base – detailed overrides live in styles/contact.css) */
 #contact {
   background-color: #f9f9f9;
   padding: 40px 20px;
   border-radius: 8px;
 }
-
-#contact h2 {
-  margin-bottom: 20px;
-}
-
-#contact p {
-  margin-bottom: 10px;
-}
-
-#contact form {
-  margin-top: 20px;
-}
-
-#contact .fas {
-  margin-right: 10px;
-}
-
-#contact .form-group {
-  margin-bottom: 20px;
-}
-
-#contact .form-control {
-  border-radius: 4px;
-  padding: 10px;
-}
-
-#contact .btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
-}
-
-#contact .btn-primary:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
-}
-
-#contact .form-group:last-of-type {
-  margin-bottom: 30px; /* Add space between the last form group and the button */
-}
-
+#contact h2 { margin-bottom: 20px; }
+#contact p { margin-bottom: 10px; }
+#contact form { margin-top: 20px; }
+#contact .fas { margin-right: 10px; }
+#contact .form-group { margin-bottom: 20px; }
+#contact .form-control { border-radius: 4px; padding: 10px; }
+#contact .btn-primary { background-color: #007bff; border-color: #007bff; }
+#contact .btn-primary:hover { background-color: #0056b3; border-color: #0056b3; }
+#contact .form-group:last-of-type { margin-bottom: 30px; }
 #contact .btn {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 4px;
-  margin-top: 20px; /* Add space at the top of the button */
-  margin-bottom: 20px; /* Add space at the bottom of the button */
+  display: block; width: 100%; padding: 10px; font-size: 16px; border-radius: 4px;
+  margin-top: 20px; margin-bottom: 20px;
 }
 
 /* Footer Component Styles */
-.footer {
-  background-color: #282c34;
-  color: white;
-  padding: 20px 0;
+.footer { background-color: #282c34; color: white; padding: 20px 0; }
+.footer a { color: white; margin: 0 10px; }
+.footer a:hover { color: #ddd; }
+
+/* Hero (iframe slideshow) */
+.HeroHeader {
+  --hero-h: 50vh;
+  --hero-overlay: rgba(0, 0, 0, 0.20); /* semi-dark, tweak as needed */
+  --chip-bg: rgba(52, 58, 64, 0.72);      /* h1/subtitle */
+  --chip-bg-weak: rgba(52, 58, 64, 0.62); /* kicker */
+  color: #fff;
+  background: #111;
+
+  /* Full-bleed: ignore parent padding/gutters */
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  margin-top: 0; /* keep flush under sticky nav */
+  margin-bottom: 24px;
 }
 
-.footer a {
-  color: white;
-  margin: 0 10px;
+.HeroHeader .slider {
+  position: relative;
+  height: var(--hero-h);
+  overflow: hidden;
+  width: 100%;
 }
 
-.footer a:hover {
-  color: #ddd;
+.HeroHeader .slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 320ms ease-in-out;
+}
+.HeroHeader .slide.is-active { opacity: 1; }
+
+.HeroHeader .frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #0b0f16;
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* Media Queries for Mobile Responsiveness */
+/* Full overlay (readability) */
+.HeroHeader .slide-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--hero-overlay);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Centered content above overlay */
+.HeroHeader .slide-content {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92%, 900px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Text chips with semi-transparent backgrounds */
+.HeroHeader .kicker {
+  display: inline-block;
+  padding: 4px 10px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--chip-bg-weak);
+  color: #fff;
+  border-radius: 999px;
+  backdrop-filter: saturate(120%) blur(1.5px);
+  -webkit-backdrop-filter: saturate(120%) blur(1.5px);
+}
+
+.HeroHeader .slide h1,
+.HeroHeader .subtitle {
+  display: inline-block;
+  padding: 8px 14px;
+  background: var(--chip-bg);
+  color: #fff;
+  border-radius: 12px;
+  backdrop-filter: saturate(120%) blur(1.5px);
+  -webkit-backdrop-filter: saturate(120%) blur(1.5px);
+}
+
+/* Buttons */
+.HeroHeader .cta-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.HeroHeader .cta-row .btn { box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+.HeroHeader .btn-outline-light { color: #fff; border-color: rgba(255,255,255,.85); background: rgba(255,255,255,.08); }
+
+/* Nav + dots */
+.HeroHeader .nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.35);
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+  z-index: 3;
+}
+.HeroHeader .nav-btn:hover { background: rgba(0,0,0,.55); }
+.HeroHeader .nav-btn.prev { left: 12px; }
+.HeroHeader .nav-btn.next { right: 12px; }
+
+.HeroHeader .dots {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+.HeroHeader .dot { width: 9px; height: 9px; border-radius: 50%; border: 0; background: rgba(255,255,255,.5); cursor: pointer; }
+.HeroHeader .dot.active { background: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .HeroHeader .slide { transition: none; }
+}
+
+/* Mobile tweaks */
 @media (max-width: 768px) {
-  .App-header {
-    padding: 40px 10px; /* Reduce padding for smaller screens */
-  }
-
-  .App-header h1 {
-    font-size: 2em; /* Reduce font size for smaller screens */
-  }
-
-  .Navbar {
-    margin: 0; /* Remove margin for smaller screens */
-    padding: 10px; /* Adjust padding for smaller screens */
-  }
-
-  .Navbar .nav-link {
-    margin-right: 10px; /* Reduce margin between nav links */
-  }
-
-  main {
-    padding: 10px; /* Reduce padding for smaller screens */
-  }
-
-  section {
-    padding: 10px; /* Reduce padding for smaller screens */
-  }
-
-  h2 {
-    font-size: 1.5em; /* Adjust font size for smaller screens */
-  }
-
-  #bio img {
-    max-width: 80%; /* Adjust image size for smaller screens */
-  }
-
-  .footer {
-    padding: 10px 0; /* Reduce padding for smaller screens */
-  }
+  .HeroHeader { --hero-h: 45vh; }
+  .HeroHeader .slide-content { width: min(94%, 720px); }
+  .App-header { padding: 40px 10px; }
+  .App-header h1 { font-size: 2em; }
+  .Navbar { margin: 0; padding: 10px; }
+  .Navbar .nav-link { margin-right: 10px; }
+  main { padding: 10px; }
+  section { padding: 10px; }
+  h2 { font-size: 1.5em; }
+  #bio img { max-width: 80%; }
+  .footer { padding: 10px 0; }
 }
 
-/* REMOVE this stray, invalid line */
-/* #f9f9f9 */
+/* Responsive header tweaks */
+@media (max-width: 575.98px) {
+  .HeroHeader { --hero-h: 46vh; }
+  .HeroHeader .slide-content { width: min(96%, 520px); }
+  .HeroHeader .kicker { font-size: 0.78rem; padding: 3px 8px; }
+  .HeroHeader .slide h1 { font-size: clamp(1.4rem, 8vw, 2rem); }
+  .HeroHeader .subtitle { font-size: clamp(0.9rem, 3.6vw, 1.05rem); }
+  .HeroHeader .cta-row .btn { padding: 6px 12px; font-size: 0.95rem; }
+  .HeroHeader .nav-btn { width: 36px; height: 36px; font-size: 22px; }
+  .HeroHeader .nav-btn.prev { left: 8px; }
+  .HeroHeader .nav-btn.next { right: 8px; }
+  .HeroHeader .dot { width: 7px; height: 7px; }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .HeroHeader { --hero-h: 48vh; }
+  .HeroHeader .slide-content { width: min(94%, 680px); }
+  .HeroHeader .slide h1 { font-size: clamp(1.6rem, 6vw, 2.4rem); }
+  .HeroHeader .subtitle { font-size: clamp(0.95rem, 2.8vw, 1.15rem); }
+  .HeroHeader .nav-btn { width: 38px; height: 38px; font-size: 24px; }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .HeroHeader { --hero-h: 52vh; }
+  .HeroHeader .slide-content { width: min(92%, 840px); }
+  .HeroHeader .slide h1 { font-size: clamp(1.7rem, 4vw, 2.6rem); }
+  .HeroHeader .subtitle { font-size: clamp(1rem, 2.2vw, 1.2rem); }
+  .HeroHeader .nav-btn { width: 40px; height: 40px; font-size: 25px; }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .HeroHeader { --hero-h: 54vh; }
+  .HeroHeader .slide-content { width: min(90%, 920px); }
+}
+
+@media (min-width: 1200px) {
+  .HeroHeader { --hero-h: 56vh; }
+  .HeroHeader .slide-content { width: min(88%, 1000px); }
+  .HeroHeader .slide h1 { font-size: clamp(2rem, 3vw, 3.2rem); }
+}
+
+/* Tighter typography on small screens */
+.HeroHeader .slide h1,
+.HeroHeader .subtitle {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 575.98px) {
+  .HeroHeader .slide h1 { font-size: clamp(1.2rem, 6.4vw, 1.7rem); padding: 6px 10px; line-height: 1.1; }
+  .HeroHeader .subtitle { font-size: clamp(0.85rem, 3.6vw, 1rem); padding: 4px 8px; }
+  .HeroHeader .kicker { font-size: 0.75rem; padding: 2px 8px; }
+}
+
+/* Extra-tight small-screen typography and controls */
+@media (max-width: 575.98px) {
+  .HeroHeader .slide-content { gap: 4px; }
+  .HeroHeader .slide h1 {
+    font-size: clamp(1rem, 5.2vw, 1.35rem);
+    padding: 4px 8px;
+    line-height: 1.08;
+  }
+  .HeroHeader .subtitle {
+    font-size: clamp(0.78rem, 3.2vw, 0.92rem);
+    padding: 3px 8px;
+  }
+  .HeroHeader .kicker { font-size: 0.7rem; padding: 2px 8px; }
+  .HeroHeader .cta-row .btn { padding: 6px 10px; font-size: 0.9rem; }
+  .HeroHeader .nav-btn { width: 32px; height: 32px; font-size: 18px; }
+}
+
+@media (max-width: 420px) {
+  .HeroHeader { --hero-h: 44vh; }
+  .HeroHeader .slide h1 { font-size: clamp(0.95rem, 5.4vw, 1.2rem); }
+  .HeroHeader .subtitle { font-size: clamp(0.75rem, 3.2vw, 0.9rem); }
+  .HeroHeader .kicker { display: none; }
+  .HeroHeader .cta-row .btn { padding: 5px 9px; font-size: 0.85rem; }
+}
+
+@media (max-width: 360px) {
+  .HeroHeader { --hero-h: 40vh; }
+  .HeroHeader .slide h1 { font-size: clamp(0.9rem, 5vw, 1.05rem); }
+  .HeroHeader .nav-btn { width: 28px; height: 28px; font-size: 16px; }
+}
+
+@media (max-width: 320px) {
+  .HeroHeader { --hero-h: 38vh; }
+  .HeroHeader .slide h1 { font-size: clamp(0.85rem, 4.6vw, 1rem); }
+}
+
+/* Short landscape screens */
+@media (max-height: 480px) and (orientation: landscape) {
+  .HeroHeader { --hero-h: 36vh; }
+  .HeroHeader .slide-content { width: min(92%, 720px); gap: 6px; }
+  .HeroHeader .kicker { display: none; }
+  .HeroHeader .subtitle { display: none; }
+  .HeroHeader .nav-btn { width: 32px; height: 32px; font-size: 18px; }
+}
+
+/* Safe-area padding for notched devices */
+@supports(padding: max(0px)) {
+  .HeroHeader .slide-content {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+}
 
 /* Ensure sticky remains active even with custom styles */
 .Navbar.sticky-top {
@@ -351,4 +430,24 @@ h2 {
     position: static;
     transform: none;
   }
+}
+
+/* Optional: cancel container padding on hero row */
+.container > .HeroHeader,
+.container-fluid > .HeroHeader,
+.row > .HeroHeader {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Smaller hero text + extra side padding so it clears arrows (final overrides) */
+@media (max-width: 575.98px) {
+  .HeroHeader .slide-content { padding-left: 56px; padding-right: 56px; }
+  .HeroHeader .slide h1 { font-size: clamp(0.88rem, 4.4vw, 1.1rem); padding: 2px 6px; line-height: 1.06; }
+  .HeroHeader .subtitle { font-size: clamp(0.66rem, 2.8vw, 0.82rem); padding: 2px 6px; }
+}
+
+/* Slightly stronger chip background on very small screens for contrast */
+@media (max-width: 420px) {
+  .HeroHeader { --chip-bg: rgba(52, 58, 64, 0.8); --chip-bg-weak: rgba(52, 58, 64, 0.7); }
 }

@@ -19,23 +19,26 @@
   color: #93c5fd;
   text-decoration: none;
 }
-.contact-info a:hover {
+.contact-info a:hover,
+.contact-info a:focus-visible {
   text-decoration: underline;
+  outline: none;
 }
+
 .info-line {
   display: flex;
   align-items: flex-start;
-  flex-wrap: wrap;           /* allow wrap to next line */
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 .info-line strong {
-  flex: 0 0 auto;            /* label stays its natural width */
+  flex: 0 0 auto;
 }
 .contact-email {
-  flex: 1 1 auto;            /* email can take remaining width and wrap */
-  min-width: 0;              /* allow shrinking inside flex */
+  flex: 1 1 auto;
+  min-width: 0;
   white-space: normal;
-  overflow-wrap: anywhere;   /* break long "words" like emails */
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 @supports (line-break: anywhere) {
@@ -104,7 +107,6 @@
   .contact-icon {
     font-size: 0.9rem;
   }
-  /* Inputs and datepicker sizing */
   .contact-card .form-control,
   .contact-card .react-datepicker-wrapper .react-datepicker__input-container input {
     font-size: 0.95rem;
@@ -204,17 +206,17 @@
 /* Prevent overflow from long email addresses */
 .info-line {
   align-items: flex-start;
-  flex-wrap: wrap;           /* allow wrap to next line */
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 .info-line strong {
-  flex: 0 0 auto;            /* label stays its natural width */
+  flex: 0 0 auto;
 }
 .contact-email {
-  flex: 1 1 auto;            /* email can take remaining width and wrap */
-  min-width: 0;              /* allow shrinking inside flex */
+  flex: 1 1 auto;
+  min-width: 0;
   white-space: normal;
-  overflow-wrap: anywhere;   /* break long "words" like emails */
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 @supports (line-break: anywhere) {
@@ -224,4 +226,28 @@
 /* Tiny phones: put email on its own line neatly */
 @media (max-width: 480px) {
   .contact-email { display: block; }
+}
+
+/* Mobile: balanced width for both info and form (not edge-to-edge) */
+@media (max-width: 575.98px) {
+  .contact-section .container { padding-left: 12px; padding-right: 12px; }
+  .contact-section .row { --bs-gutter-x: 0.75rem; }
+
+  .contact-info,
+  .contact-card {
+    width: calc(100vw - 48px);     /* ~24px gutters per side */
+    max-width: none;
+    margin-left: calc(-50vw + 50% + 24px);
+    margin-right: calc(-50vw + 50% + 24px);
+  }
+}
+
+/* Extra-small phones: a touch more gutter */
+@media (max-width: 360px) {
+  .contact-info,
+  .contact-card {
+    width: calc(100vw - 56px);     /* ~28px gutters per side */
+    margin-left: calc(-50vw + 50% + 28px);
+    margin-right: calc(-50vw + 50% + 28px);
+  }
 }
